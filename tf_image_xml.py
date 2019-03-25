@@ -21,14 +21,8 @@ from tensorflow.python.profiler import option_builder
 sys.path.append("../../")
 from object_detection.utils import ops as utils_ops
 
-if tf.__version__ < '1.4.0':
+if tf.__version__ < '1.12.0':
   raise ImportError('Please upgrade your tensorflow installation to v1.4.* or later!')
-# colors_tableau = [(0, 0, 255), (31, 119, 180),(255, 127, 14), (44, 160, 44),(214, 39, 40),
-#                       (148, 103, 189), (0, 127, 127), (199, 199, 199),(185,218,165),(96,78,254),
-#                       (188, 189, 34), (255,0,0), (255, 128, 0), (32, 21, 43)]
-
-# class_tableau = ['person', 'motorbike', 'car', 'SUV', 'bus', 'microbus', 'pickup', 'truck', 'tanker', 'tractor', 'engineeringvan', 'tricycle']
-
 
 from object_detection.utils import label_map_util
 

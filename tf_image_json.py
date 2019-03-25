@@ -21,7 +21,7 @@ class NumpyEncoder(json.JSONEncoder):
 # Tensorflow默认的logging information太多，看着糟心
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 # 显卡配置
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 # 随着进程逐渐增加显存占用，而不是一下子占满
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -56,10 +56,10 @@ category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABE
 
 # os.chdir(PATH_TO_TEST_IMAGES_DIR)
 for aaa in range(1,21):
-    if aaa in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,18,19,20]:
-       continue
-    # PATH_TO_TEST_IMAGES_DIR = '/home/xuyan.zhao/frames/c'+str(aaa)
-    PATH_TO_TEST_IMAGES_DIR = '/home/xuyan.zhao/c15'
+    # if aaa in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,18,19,20]:
+    #    continue
+    PATH_TO_TEST_IMAGES_DIR = '/home/xuyan.zhao/c'+str(aaa)
+    # PATH_TO_TEST_IMAGES_DIR = '/home/xuyan.zhao/c15'
     imgs = os.listdir(PATH_TO_TEST_IMAGES_DIR)
     imgs.sort(key= lambda x:int(x[:-4]))
     # TEST_IMAGE_PATHS = [ os.path.join(PATH_TO_TEST_IMAGES_DIR, '{}.jpg'.format(i)) for i in range(1, 8000) ]
@@ -91,13 +91,10 @@ for aaa in range(1,21):
             s_classes = classes[scores > confident]
             s_scores = scores[scores > confident]
             list_classes = []
+            list_scores = []
             for i in range(len(s_classes)):
                 name = image_path.split("/")[-1]
-                # name = image_path.split("\\")[-1].split('.')[0]   # without .jpg
-                # ymin = s_boxes[i][0] * height  # ymin
-                # xmin = s_boxes[i][1] * width  # xmin
-                # ymax = s_boxes[i][2] * height  # ymax
-                # xmax = s_boxes[i][3] * width  # xmax
+
                 ymin = s_boxes[i][0]  # ymin
                 xmin = s_boxes[i][1]  # xmin
                 ymax = s_boxes[i][2]  # ymax
@@ -107,6 +104,7 @@ for aaa in range(1,21):
                     class_name = category_index[s_classes[i]]['name']  # get class name
                     print("====================>", s_classes[i])
                 list_classes.append(class_name)
+                list_scores.append(str(score))
                 print("name:", name)
                 print("ymin:", ymin)
                 print("xmin:", xmin)
@@ -115,10 +113,10 @@ for aaa in range(1,21):
                 print("score:", score)
                 print("class:", class_name)
                 print("################")
-            write_dict = {'boxes':s_boxes, 'classes':list_classes}
+            write_dict = {'boxes':s_boxes, 'classes':list_classes, 'scores':list_scores}
             json_str = json.dumps(write_dict, cls=NumpyEncoder)
             new_dict = json.loads(json_str)
-            with open("./json"+str(aaa)+"_map40/"+str(n)+".json","w") as f:
+            with open("./json_output_map40_with_scores/"+"json_"+str(aaa)+"/"+str(n)+".json","w") as f:
                 json.dump(new_dict,f)
                 print("load file...")
             n = n + 1

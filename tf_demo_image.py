@@ -36,7 +36,7 @@ import matplotlib;
 matplotlib.use('Agg')
 
 # 指定哪张卡
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 
 # 随着进程逐渐增加显存占用，而不是一下子占满
 config = tf.ConfigProto()
@@ -91,7 +91,8 @@ def load_image_into_numpy_array(image):
 ##############################################################
 
 # 测试图片input
-PATH_TO_TEST_IMAGES_DIR = '/DATACENTER1/xuyan.zhao/models/research/object_detection/exp/faster_rcnn_resnet101_people/test_images_input'
+# PATH_TO_TEST_IMAGES_DIR = '/DATACENTER1/xuyan.zhao/models/research/object_detection/exp/faster_rcnn_resnet101_people/test_images_input'
+PATH_TO_TEST_IMAGES_DIR = './person'
 TEST_IMAGE_PATHS = os.listdir(PATH_TO_TEST_IMAGES_DIR)
 
 
@@ -143,21 +144,26 @@ def run_inference_for_single_image(image, graph):
   return output_dict
 
 ########################################################
+def bgr2rgb(image_np):
+  bgr = image_np
+  return cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
 
 for image_path in TEST_IMAGE_PATHS:
-  image = Image.open(os.path.join(PATH_TO_TEST_IMAGES_DIR, image_path))
-  image_np = load_image_into_numpy_array(image)
-  image_np_expanded = np.expand_dims(image_np, axis=0)
-  output_dict = run_inference_for_single_image(image_np, detection_graph)
-  vis_util.visualize_boxes_and_labels_on_image_array(
-      image_np,
-      output_dict['detection_boxes'],
-      output_dict['detection_classes'],
-      output_dict['detection_scores'],
-      category_index,
-      instance_masks=output_dict.get('detection_masks'),
-      use_normalized_coordinates=True,
-      line_thickness=4)
-  cv2.imwrite("/DATACENTER1/xuyan.zhao/models/research/object_detection/exp/faster_rcnn_resnet101_people/test_images_output/"+image_path.split("/")[-1], image_np)
+  if image_path.endswith(".jpeg"):
+    image = Image.open(os.path.join(PATH_TO_TEST_IMAGES_DIR, image_path))
+    image_np = load_image_into_numpy_array(image)
+    image_np_expanded = np.expand_dims(image_np, axis=0)
+    output_dict = run_inference_for_single_image(image_np, detection_graph)
+    vis_util.visualize_boxes_and_labels_on_image_array(
+        image_np,
+        output_dict['detection_boxes'],
+        output_dict['detection_classes'],
+        output_dict['detection_scores'],
+        category_index,
+        instance_masks=output_dict.get('detection_masks'),
+        use_normalized_coordinates=True,
+        line_thickness=4)
+    cv2.imwrite("./output/"+image_path.split("/")[-1], bgr2rgb(image_np))
+
 
 

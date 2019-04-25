@@ -1,5 +1,5 @@
 """
-输入：图片dir
+输入：图片dir,frozen_inference_graph.pb
 输出：图片对应的xml dir
 """
 import numpy as np
@@ -97,22 +97,28 @@ class Detector():
         return output_dict['detection_classes'][mask],output_dict['detection_scores'][mask],output_dict['detection_boxes'][mask]
 
 
+def may_mkdir(dir_name):
+    if not os.path.isdir(dir_name):
+        os.makedirs(dir_name)
+
 if __name__ == '__main__':
     # class_name = ['person', 'motorbike', 'car', 'SUV', 'bus', 'microbus', 'pickup', 'truck', 'tanker', 'tractor', 'engineeringvan', 'tricycle']
     class_name = ['person']
 
     d = Detector(PATH_TO_CKPT,PATH_TO_LABELS, NUM_CLASSES)
-    j=0
-    img_dir = ""
-    xml_output_dir = ""
+    # j=0
+    img_dir = "./money_person"
+    xml_output_dir = "./money_person_xml"
+    may_mkdir(xml_output_dir)
+
     for img_filename in os.listdir(img_dir):
-        print(img_filename)
+
         img = cv2.imread(os.path.join(img_dir, img_filename))
-        width = img.shape[1]
-        height = img.shape[0]
+        width_origin = img.shape[1]
+        height_origin = img.shape[0]
         classes,scores,boxes=d.process_img(img)
-        print(j)
-        j=j+1
+        # print(j)
+        # j=j+1
         #生成xml
         doc = Document()
         annotation = doc.createElement('annotation')
@@ -121,7 +127,7 @@ if __name__ == '__main__':
         #folder
         folder = doc.createElement('folder')
         annotation.appendChild(folder)
-        folder.appendChild(doc.createTextNode("hongqiao"))
+        folder.appendChild(doc.createTextNode("money_person"))
 
         #filename
         filename = doc.createElement('filename')
@@ -131,7 +137,7 @@ if __name__ == '__main__':
         #path
         path = doc.createElement('path')
         annotation.appendChild(path)
-        path.appendChild(doc.createTextNode("/DATACENTER3/hjc/henangaosu"))
+        path.appendChild(doc.createTextNode("/disk3/xuyan.zhao/models/research/object_detection/exp/faster_rcnn_resnet101_people"))
 
         #source
         source = doc.createElement('source')
@@ -151,8 +157,8 @@ if __name__ == '__main__':
         size.appendChild(depth)
 
         # 图片尺寸要改
-        width.appendChild(doc.createTextNode(str(width)))
-        height.appendChild(doc.createTextNode(str(height)))
+        width.appendChild(doc.createTextNode(str(width_origin)))
+        height.appendChild(doc.createTextNode(str(height_origin)))
         depth.appendChild(doc.createTextNode("3"))
 
         #segmented
@@ -192,10 +198,11 @@ if __name__ == '__main__':
             bndbox.appendChild(ymin)
             bndbox.appendChild(xmax)
             bndbox.appendChild(ymax)
-            xmin.appendChild(doc.createTextNode(str(int(boxes[i][1]*width))))
-            ymin.appendChild(doc.createTextNode(str(int(boxes[i][0]*height))))
-            xmax.appendChild(doc.createTextNode(str(int(boxes[i][3]*width))))
-            ymax.appendChild(doc.createTextNode(str(int(boxes[i][2]*height))))
+            xmin.appendChild(doc.createTextNode(str(int(boxes[i][1]*width_origin))))
+            ymin.appendChild(doc.createTextNode(str(int(boxes[i][0]*height_origin))))
+            xmax.appendChild(doc.createTextNode(str(int(boxes[i][3]*width_origin))))
+            ymax.appendChild(doc.createTextNode(str(int(boxes[i][2]*height_origin))))
             i=i+1
-        with open(os.path.join(xml_output_dir, img_filename[:-3]+"xml"), 'w') as f:
+        with open(os.path.join(xml_output_dir, img_filename[:-3]+"xml"), 'wb') as f:
             f.write(doc.toprettyxml(indent='\t', encoding='utf-8'))
+            print("done:",img_filename)
